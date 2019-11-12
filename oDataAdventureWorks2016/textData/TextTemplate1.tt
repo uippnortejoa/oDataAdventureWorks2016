@@ -1,0 +1,26 @@
+﻿<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".txt" #>
+
+<#@ template hostspecific="true" language="C#" #>  
+<#@ output extension=".txt" #>  
+<#@ import namespace="System.IO" #>  
+<#  
+ // Find a path within the same project as the text template:  
+ string[] lines = System.IO.File.ReadAllLines(@"C:\UIPP.VISUALSTUDIO.COM\FC Gulbenkian\_codeSamples\FCGSampleData\FCGSampleData\textData\AccountidCustomerRowGuid.txt");  
+#>  
+
+Content of MyFile.txt is:  
+  <#  
+
+
+  
+    for(int i = 1; i < lines.Count(); i++)  
+    { 
+	string[] content = lines[i].Split('\t');
+	WriteLine(String.Concat("UPDATE [Sales].[Customer] SET dynamicsAccountId = '", content[1], "' WHERE rowguid = '", content[0], "'"));
+	 }
+	#>
+

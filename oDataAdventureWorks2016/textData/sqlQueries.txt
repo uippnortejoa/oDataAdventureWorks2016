@@ -1,0 +1,75 @@
+﻿
+AdventureWorks2016
+
+SELECT TOP (80) [SalesOrderID] as Number
+      ,[OrderDate]
+      ,Customers.rowguid as [CustomerID]  
+      ,[SubTotal]
+      ,[TaxAmt]
+      ,[Freight]
+      ,[TotalDue]
+      ,Orders.rowguid As Id
+      ,Orders.[ModifiedDate],
+	  [Customers].[dynamicsAccountId]
+  FROM [AdventureWorks2016].[Sales].[SalesOrderHeader] As Orders
+  inner join [Sales].[Customer] as Customers on [Orders].[CustomerID] = [Customers].[CustomerID]
+  ORDER BY [SalesOrderID]
+
+  SELECT OrderDetails.rowguid As Id, Orders.rowguid As SalesOrderId, Products.rowguid As ProductId, [OrderQty],[UnitPrice], [LineTotal]  FROM [Sales].[SalesOrderDetail] As OrderDetails
+  inner join [AdventureWorks2016].[Sales].[SalesOrderHeader] As Orders on OrderDetails.SalesOrderID = Orders.SalesOrderID
+  inner join [Production].[Product] As Products On OrderDetails.ProductID = Products.ProductID
+  WHERE OrderDetails.[SalesOrderID] IN (SELECT TOP 80 [SalesOrderID] FROM [Sales].[SalesOrderHeader] ORDER BY [SalesOrderID])
+
+
+  SELECT rowguid As Id, [ProductNumber], [Name], ModifiedDate As [ModifiedOn] FROM [Production].[Product]
+  WHERE ProductId in (
+  SELECT  Products.ProductId FROM [Sales].[SalesOrderDetail] As OrderDetails
+  inner join [AdventureWorks2016].[Sales].[SalesOrderHeader] As Orders on OrderDetails.SalesOrderID = Orders.SalesOrderID
+  inner join [Production].[Product] As Products On OrderDetails.ProductID = Products.ProductID
+  WHERE OrderDetails.[SalesOrderID] IN (SELECT TOP 80 [SalesOrderID] FROM [Sales].[SalesOrderHeader] ORDER BY [SalesOrderID])
+  )
+
+  https://awsampledata.azurewebsites.net/odata/
+
+
+  --Link with accounts «demo purpose only» 
+1)  Add column dynamicsAccountId to Sales.Customer table;
+  /* To prevent any potential data loss issues, you should review this script in detail before running it outside the context of the database designer.*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE Sales.Customer ADD
+	dynamicsAccountId uniqueidentifier NULL
+GO
+ALTER TABLE Sales.Customer SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+--
+
+2) Get our CustomerId's
+  SELECT DISTINCT Customers.rowguid
+FROM  [Sales].[Customer] as Customers
+WHERE Customers.rowguid in (
+SELECT TOP (80)  Customers.rowguid
+  FROM [AdventureWorks2016].[Sales].[SalesOrderHeader] As Orders
+  inner join [Sales].[Customer] as Customers on [Orders].[CustomerID] = [Customers].[CustomerID]
+  ORDER BY [SalesOrderID]
+) 
+
+3) Get some account id's from dynamics organizations
+CRM toolbox FetchXml Builder, is a way ..
+
+4) Build a txt Tab column separeted in excel Customer.rowguid, dynamicsAccountId
+
+5) TextTemplate1.tt (T4 template) generate SQL update script's
+
+6) Apply Scripts on AdventueWorks2016 db;
+
