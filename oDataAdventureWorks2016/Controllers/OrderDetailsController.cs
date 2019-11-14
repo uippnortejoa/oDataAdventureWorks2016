@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FCGSampleData.Controllers
 {
-
+    //Some comment
     public class OrderDetailsController : ODataController
     {
         private AdventureWorksContext _db;
